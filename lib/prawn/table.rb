@@ -259,14 +259,16 @@ module Prawn
         end
       end
 
-      lazy_draw_borders = []
+      # Track cells to be drawn on this page. They will all be drawn when this
+      # page is finished.
+      cells_this_page = []
+
       @cells.each do |cell|
         if cell.height > (cell.y + offset) - ref_bounds.absolute_bottom &&
            cell.row > started_new_page_at_row
-          lazy_draw_borders.each do |cell_, pt_|
-            cell_.send(:draw_borders, pt_)
-          end
-          lazy_draw_borders.clear
+          # Ink all cells on the current page
+          Cell.draw_cells(cells_this_page)
+          cells_this_page = []
 
           # start a new page or column
           @pdf.bounds.move_past_bottom
@@ -292,14 +294,11 @@ module Prawn
           cell.background_color = @row_colors[index % @row_colors.length]
         end
 
-        cell.draw([x, y])
-        lazy_draw_borders << [cell, [x, y]]
+        cells_this_page << [cell, [x, y]]
         last_y = y
       end
-      lazy_draw_borders.each do |cell_, pt_|
-        cell_.send(:draw_borders, pt_)
-      end
-      lazy_draw_borders.clear
+      # Draw the last page of cells
+      Cell.draw_cells(cells_this_page)
 
       @pdf.move_cursor_to(last_y - @cells.last.height)
     end
