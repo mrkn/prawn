@@ -17,7 +17,7 @@ describe "#width_of" do
     create_pdf
     original_width = @pdf.width_of("hello world")
     @pdf.character_spacing(7) do
-      @pdf.width_of("hello world").should == original_width + 11 * 7
+      @pdf.width_of("hello world").should == original_width + 10 * 7
     end
   end
 end
