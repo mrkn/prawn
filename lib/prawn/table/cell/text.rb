@@ -16,7 +16,7 @@ module Prawn
 
         TextOptions = [:inline_format, :kerning, :size, :align, :valign,
           :rotate, :rotate_around, :leading, :single_line, :skip_encoding,
-          :overflow, :min_font_size]
+          :overflow, :min_font_size, :character_spacing]
 
         TextOptions.each do |option|
           define_method("#{option}=") { |v| @text_options[option] = v }
@@ -125,7 +125,9 @@ module Prawn
             options = {}
             options[:size] = @text_options[:size] if @text_options[:size]
 
-            @pdf.font.compute_width_of(text, options)
+            @pdf.character_spacing(@text_options[:character_spacing] || @pdf.character_spacing) do
+              @pdf.width_of(text, options)
+            end
           end
         end
 
