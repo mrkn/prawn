@@ -250,6 +250,15 @@ describe "When reopening pages" do
     pages[1][:strings].should == ["New page 2"]
     pages[2][:strings].should == ["Old page 2"]
   end
+
+  it "should update the bounding box to the new page's margin box" do
+    Prawn::Document.new do
+      start_new_page :layout => :landscape
+      lsize = [bounds.width, bounds.height]
+      go_to_page 1
+      [bounds.width, bounds.height].should == lsize.reverse
+    end
+  end
 end
 
 describe "When setting page size" do
@@ -292,13 +301,20 @@ describe "When setting page layout" do
     pages.first[:size].should == Prawn::Document::PageGeometry::SIZES["A4"].reverse
   end   
 
-  it "should retain page layout  by default when starting a new page" do
+  it "should retain page layout by default when starting a new page" do
     @pdf = Prawn::Document.new(:page_layout => :landscape)
     @pdf.start_new_page(:trace => true)
     pages = PDF::Inspector::Page.analyze(@pdf.render).pages
     pages.each do |page|
       page[:size].should == Prawn::Document::PageGeometry::SIZES["LETTER"].reverse
     end
+  end
+
+  it "should swap the bounds when starting a new page with different layout" do
+    @pdf = Prawn::Document.new
+    size = [@pdf.bounds.width, @pdf.bounds.height]
+    @pdf.start_new_page(:layout => :landscape)
+    [@pdf.bounds.width, @pdf.bounds.height].should == size.reverse
   end
 end
 

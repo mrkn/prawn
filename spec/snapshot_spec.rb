@@ -112,6 +112,30 @@ describe "Prawn::Document#transaction" do
     end
 
   end
+
+  it "should restore bounds on rollback" do
+    Prawn::Document.new(:page_layout => :landscape) do
+      size = [bounds.width, bounds.height]
+      transaction do
+        start_new_page :layout => :portrait
+        rollback
+      end
+      [bounds.width, bounds.height].should == size
+    end
+  end
+
+  it "should set new bounding box on start_new_page with different layout" do
+    Prawn::Document.new(:page_layout => :landscape) do
+      size = [bounds.width, bounds.height]
+      transaction do
+        start_new_page
+        rollback
+      end
+
+      start_new_page :layout => :portrait
+      [bounds.width, bounds.height].should == size.reverse
+    end
+  end
   
   describe "with a stamp dictionary present" do
 
